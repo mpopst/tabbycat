@@ -343,16 +343,17 @@ class DebateTeam(models.Model):
     @property
     def opponent(self):
         try:
-            return self._opponent
+            return self._opponents
         except AttributeError:
             try:
-                self._opponent = DebateTeam.objects.exclude(side=self.side).select_related(
+                self._opponents = DebateTeam.objects.exclude(side=self.side).select_related(
                         'team', 'team__institution').get(debate=self.debate)
             except (DebateTeam.DoesNotExist, DebateTeam.MultipleObjectsReturned):
                 logger.warning("No opponent found for %s", str(self))
                 self._opponent = None
-            return self._opponent
+            return self._opponents
 
+    @property
     def opponents(self):
         try:
             return self._opponents

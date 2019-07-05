@@ -45,13 +45,6 @@ def populate_opponents(debateteams, speakers=True):
             except KeyError:
                 pass
                 #logger.warning("No opponent found for %s", str(dt))
-        for dt in debateteams:
-            dt_annotated = debateteams_annotated_by_id[dt.id]
-            try:
-                dt._opponent = opponent_dts[dt_annotated.opponent_id]
-            except KeyError:
-                logger.warning("No opponent found for %s", str(dt))
-                dt._opponent = None
 
 def populate_history(debates):
     """Sets the attribute _history to the number of times the teams in the
