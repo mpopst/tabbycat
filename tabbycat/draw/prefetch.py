@@ -19,7 +19,7 @@ def populate_opponents(debateteams, speakers=True):
 
     ids = [dt.id for dt in debateteams]
     opponent_subq = DebateTeam.objects.filter(
-        debate=OuterRef('debate')).exclude(id=OuterRef('id')).values('id')[:1]
+        debate=OuterRef('debate')).exclude(id=OuterRef('id')).values('id')
     debateteams_annotated = DebateTeam.objects.filter(id__in=ids).annotate(
         opponent_id=Subquery(opponent_subq))
 
