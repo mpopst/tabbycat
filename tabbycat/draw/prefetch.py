@@ -19,11 +19,16 @@ def populate_opponents(debateteams, speakers=True):
 
     ids = [dt.id for dt in debateteams]
     opponent_subq = DebateTeam.objects.filter(
-        debate=OuterRef('debate')).exclude(id=OuterRef('id')).values('id')
+        debate=OuterRef('debate')).exclude(id=OuterRef('id')).values('id')[:1]
     debateteams_annotated = DebateTeam.objects.filter(id__in=ids).annotate(
         opponent_id=Subquery(opponent_subq))
-
-    debateteams_annotated_by_id = {dt.id: dt for dt in debateteams_annotated}
+    debateteams_annotated_by_id = dict()
+    for dt in debateteams_annotated:
+        if dt.id in debateteams_annotated_by_id.keys():
+            debateteams_annotated_by_id[dt.id].append(dt)
+        else:
+            debateteams_annotated_by_id[dt.id] = [dt]
+    ##debateteams_annotated_by_id = {dt.id: dt for dt in debateteams_annotated}
     opponent_ids = [dt.opponent_id for dt in debateteams_annotated]
 
     opponent_dts = DebateTeam.objects.select_related('team')
@@ -33,12 +38,20 @@ def populate_opponents(debateteams, speakers=True):
 
     for dt in debateteams:
         dt_annotated = debateteams_annotated_by_id[dt.id]
-        try:
-            dt._opponent = opponent_dts[dt_annotated.opponent_id]
-        except KeyError:
-            logger.warning("No opponent found for %s", str(dt))
-            dt._opponent = None
-
+        dt_opponents = []
+        for dta in dt_annotated:
+            try:
+                dt._opponents.append(opponent_dts[dta.opponent_id])
+            except KeyError:
+                pass
+                #logger.warning("No opponent found for %s", str(dt))
+        for dt in debateteams:
+            dt_annotated = debateteams_annotated_by_id[dt.id]
+            try:
+                dt._opponent = opponent_dts[dt_annotated.opponent_id]
+            except KeyError:
+                logger.warning("No opponent found for %s", str(dt))
+                dt._opponent = None
 
 def populate_history(debates):
     """Sets the attribute _history to the number of times the teams in the

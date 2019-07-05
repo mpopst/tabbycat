@@ -353,6 +353,18 @@ class DebateTeam(models.Model):
                 self._opponent = None
             return self._opponent
 
+    def opponents(self):
+        try:
+            return self._opponents
+        except AttributeError:
+            try:
+                self._opponents = DebateTeam.objects.exclude(side=self.side).select_related(
+                        'team', 'team__institution').get(debate=self.debate)
+            except (DebateTeam.DoesNotExist, DebateTeam.MultipleObjectsReturned):
+                logger.warning("No opponent found for %s", str(self))
+                self._opponent = None
+            return self._opponents
+
     def get_flags_display(self):
         if not self.flags:
             return []  # don't return [""]
