@@ -228,7 +228,8 @@ class DrawStrengthMetricAnnotator(BaseMetricAnnotator):
             for dt in points_queryset_debateteams[team.id]:
                 points = 0
                 for opponent in dt.opponents:
-                    points += points_queryset_teams[opponent.team_id].points
+                    #points += points_queryset_teams[opponent.team_id].points
+                    points += 1
                 draw_strength += points;
             standings.add_metric(team, self.key, draw_strength)
 
